@@ -1,0 +1,6 @@
+{
+  "name": "Formulario de Control Migratorio y Aduanero",
+  "description": "Formulario en línea previo al viaje que reúne identidad, motivo, acompañantes y documentos de viajeros para generar un código QR que agiliza la atención de PDI y Aduana.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
