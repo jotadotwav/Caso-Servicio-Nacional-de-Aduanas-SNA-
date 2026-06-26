@@ -87,6 +87,7 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
   const [nationality, setNationality] = useState('Argentina');
   const [documentType, setDocumentType] = useState<'pasaporte' | 'dni' | 'cedula'>('pasaporte');
   const [documentNumber, setDocumentNumber] = useState('');
+  const [showDocError, setShowDocError] = useState<boolean>(false);
   const [countryOfIssue, setCountryOfIssue] = useState('Chile');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -173,8 +174,30 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
     setCompanions(companions.filter(c => c.id !== id));
   };
 
+  const handleNextStep = () => {
+    if (step === 1) {
+      if (documentNumber.trim() === '') {
+        setShowDocError(true);
+        return;
+      }
+      if (fullName.trim() === '' || birthDate === '') {
+        return;
+      }
+    }
+    if (step === 2) {
+      if (originCity.trim() === '' || addressInChile.trim() === '') {
+        return;
+      }
+    }
+    setStep(step + 1);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 4) {
+      handleNextStep();
+      return;
+    }
     const cleanId = 'CL-' + Math.floor(10000 + Math.random() * 90000);
     
     const newDoc: TravelerDeclaration = {
@@ -228,16 +251,6 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
     setRegisteredDoc(newDoc);
     onRegister(newDoc);
     setStep(5);
-  };
-
-  const isStepValid = () => {
-    if (step === 1) {
-      return fullName.trim() !== '' && documentNumber.trim() !== '' && birthDate !== '';
-    }
-    if (step === 2) {
-      return originCity.trim() !== '' && addressInChile.trim() !== '';
-    }
-    return true;
   };
 
   const handlePrint = () => {
@@ -445,10 +458,22 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
                     type="text"
                     required
                     value={documentNumber}
-                    onChange={(e) => setDocumentNumber(e.target.value)}
+                    onChange={(e) => {
+                      setDocumentNumber(e.target.value);
+                      if (showDocError && e.target.value.trim() !== '') {
+                        setShowDocError(false);
+                      }
+                    }}
                     placeholder="Ej. FR8432298"
-                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002f6c] outline-none"
+                    className={`w-full px-3.5 py-2 text-sm border rounded-lg outline-none ${
+                      showDocError && documentNumber.trim() === ''
+                        ? 'border-red-500 focus:ring-2 focus:ring-red-500 bg-red-50/10 text-red-900'
+                        : 'border-slate-300 focus:ring-2 focus:ring-[#002f6c]'
+                    }`}
                   />
+                  {showDocError && documentNumber.trim() === '' && (
+                    <p className="text-red-500 text-xs mt-1">Campo obligatorio</p>
+                  )}
                 </div>
 
                 <div>
@@ -1335,9 +1360,8 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
               {step < 4 ? (
                 <button
                   type="button"
-                  onClick={() => setStep(step + 1)}
-                  disabled={!isStepValid()}
-                  className="px-5 py-2 bg-slate-900 hover:bg-slate-950 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none cursor-pointer"
+                  onClick={handleNextStep}
+                  className="px-5 py-2 bg-slate-900 hover:bg-slate-950 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   Continuar <ArrowRight className="w-4 h-4 text-white" />
                 </button>
