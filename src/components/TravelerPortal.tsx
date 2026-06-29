@@ -310,37 +310,78 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
         </div>
       </div>
 
-      {/* Step Tracker (Only visible during filing) */}
+      {/* Barra de Progreso (Only visible during filing) */}
       {step < 5 && (
-        <div className="p-4 bg-slate-50/50 border-b border-slate-100 px-6 sm:px-12">
-          <div className="flex items-center justify-between">
+        <div className="p-5 bg-slate-50/50 border-b border-slate-100 px-6 sm:px-12 select-none">
+          {/* Progress Indicator Metadata */}
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-[10px] font-bold text-[#002f6c] uppercase tracking-wider font-mono">
+              Progreso de Declaración
+            </span>
+            <span className="text-[10px] font-bold text-slate-500 font-mono">
+              Etapa {step} de 4 ({Math.round(((step - 1) / 3) * 100)}%)
+            </span>
+          </div>
+
+          {/* Visual Progress Bar and Nodes */}
+          <div className="relative flex items-center justify-between w-full mt-4">
+            {/* Background Line */}
+            <div className="absolute left-0 right-0 top-1/2 h-1 bg-slate-200 -translate-y-1/2 rounded-full" />
+            
+            {/* Active Filled Line */}
+            <div 
+              className="absolute left-0 top-1/2 h-1 bg-[#002f6c] -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
+              style={{ width: `${((step - 1) / 3) * 100}%` }}
+            />
+
+            {/* Nodes */}
             {[
               { num: 1, label: 'Identidad', icon: User },
               { num: 2, label: 'Viaje', icon: Plane },
               { num: 3, label: 'Compañeros', icon: Users },
               { num: 4, label: 'Declaración', icon: ShieldAlert }
-            ].map((s) => (
-              <div key={s.num} className="flex items-center gap-2 flex-1 last:flex-none">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
-                  step === s.num 
-                    ? 'border-slate-900 bg-slate-900 text-white font-bold ring-4 ring-slate-100' 
-                    : step > s.num 
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-600' 
-                      : 'border-slate-200 bg-white text-slate-400'
-                }`}>
-                  {step > s.num ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    <span className="text-xs">{s.num}</span>
-                  )}
+            ].map((s) => {
+              const Icon = s.icon;
+              const isCompleted = step > s.num;
+              const isActive = step === s.num;
+
+              return (
+                <div key={s.num} className="relative z-10 flex flex-col items-center">
+                  {/* Node Circle */}
+                  <div 
+                    className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 transition-all duration-300 ${
+                      isActive 
+                        ? 'border-[#002f6c] bg-[#002f6c] text-white font-bold ring-4 ring-[#002f6c]/10 scale-110' 
+                        : isCompleted 
+                          ? 'border-emerald-600 bg-emerald-600 text-white' 
+                          : 'border-slate-300 bg-white text-slate-400'
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
+                    ) : (
+                      <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    )}
+                  </div>
+
+                  {/* Label */}
+                  <span 
+                    className={`absolute -bottom-6 sm:-bottom-7 whitespace-nowrap text-[9px] sm:text-[11px] font-bold tracking-tight transition-colors duration-300 ${
+                      isActive 
+                        ? 'text-[#002f6c]' 
+                        : isCompleted 
+                          ? 'text-emerald-700' 
+                          : 'text-slate-400'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
                 </div>
-                <span className={`text-xs font-semibold hidden md:inline-block ${
-                  step === s.num ? 'text-slate-900 font-bold' : 'text-slate-400'
-                }`}>{s.label}</span>
-                {s.num < 4 && <div className="hidden md:block flex-1 h-0.5 max-w-16 bg-slate-200 mx-2" />}
-              </div>
-            ))}
+              );
+            })}
           </div>
+          {/* Spacing compensation for absolute labels */}
+          <div className="h-4 sm:h-5" />
         </div>
       )}
 
