@@ -257,6 +257,36 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
     window.print();
   };
 
+  const handleDownloadQR = () => {
+    const svgElement = document.getElementById('passport-qr-code');
+    if (!svgElement) return;
+
+    try {
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svgElement);
+
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      if (!source.match(/^<svg[^>]+ xmlns:xlink="http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+      }
+
+      const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Pase_Digital_${registeredDoc?.id || 'QR'}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download QR code', err);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" id="traveler-app-portal">
       {/* Sleek Minimalist Border Accent */}
@@ -1316,28 +1346,37 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
               </div>
 
               {/* Action operations on bottom voucher */}
-              <div className="flex justify-center flex-wrap gap-3">
+              <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
                 <button
                   type="button"
-                  onClick={handlePrint}
-                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                  onClick={handleDownloadQR}
+                  className="w-full py-3.5 px-6 bg-[#002f6c] hover:bg-[#001f4c] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-98 cursor-pointer"
                 >
-                  <Printer className="w-4 h-4" /> Imprimir Pase de Ingreso
+                  <Download className="w-5 h-5 text-white" /> Descargar QR
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // reset form
-                    setStep(1);
-                    setFullName('');
-                    setDocumentNumber('');
-                    setBirthDate('');
-                    setScanSuccess(false);
-                  }}
-                  className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  Registar Nueva Declaración
-                </button>
+                <div className="flex gap-3 w-full">
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" /> Imprimir Pase
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // reset form
+                      setStep(1);
+                      setFullName('');
+                      setDocumentNumber('');
+                      setBirthDate('');
+                      setScanSuccess(false);
+                    }}
+                    className="flex-1 py-2.5 px-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer text-center justify-center"
+                  >
+                    Nuevo Registro
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
