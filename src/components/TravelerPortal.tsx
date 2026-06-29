@@ -825,7 +825,7 @@ export default function TravelerPortal({ onRegister }: TravelerPortalProps) {
                                 : 'bg-[#002f6c] hover:bg-[#001f4c]'
                             }`}
                           >
-                            <Plus className="w-3.5 h-3.5" /> Agregar Acompañante
+                            <CheckCircle className="w-3.5 h-3.5" /> Finalizar
                           </button>
                         </div>
                       </div>
